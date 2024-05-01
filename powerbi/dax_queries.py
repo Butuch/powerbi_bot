@@ -5,12 +5,11 @@ SUMMARIZECOLUMNS(
     \\\"Sum\\\", round([6010_РеалТМЗ_кол], 0)
     )"""
     
-    
 cash_query = """
 EVALUATE
-SUMMARIZECOLUMNS(
-    'Date'[Year],
-    \\\"Sum\\\", round([6010_РеалТМЗ_кол], 0)
+    SUMMARIZECOLUMNS(
+		'2 Проводки'[Bank_account], 'Пркл_Валюта'[Валюта],
+        \\\"cash\\\", 'Balance_sheet'[cash]
     )"""
     
     
