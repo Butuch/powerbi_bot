@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
+
 from config_data.configs import Config, load_config
 from config_data.set_menu import set_main_menu
 from handlers import user_handlers, other_handlers
