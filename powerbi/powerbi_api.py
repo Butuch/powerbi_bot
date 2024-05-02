@@ -3,6 +3,8 @@ import pandas as pd
 import csv
 import json
 
+from .powerbi_token import token_api_powerbi
+
 
 def _get_powerbi_datasets(access_token):
     "Get datasets list"
@@ -38,12 +40,12 @@ def _text_query(dax_query):
     return api_query
 
 
-def execute_query(access_token: str, query_set: tuple[str, str]) -> pd.core.frame.DataFrame:
+def execute_query(query_set: tuple[str, str]) -> pd.core.frame.DataFrame:
     "Executes a query to the Power BI API and returns the result as a DataFrame."
     
     dataset_id, query = query_set
     headers = {
-        'Authorization': f'Bearer {access_token}',
+        'Authorization': f'Bearer {token_api_powerbi}',
         'Content-Type': 'application/json'
     }
     url = f'https://api.powerbi.com/v1.0/myorg/datasets/{dataset_id}/executeQueries'
@@ -58,12 +60,12 @@ def execute_query(access_token: str, query_set: tuple[str, str]) -> pd.core.fram
         return pd.DataFrame() # f'Error: {read_dataset.status_code}'
 
 
-def execute_query_json(access_token: str, query_set: tuple[str, str]):
+def execute_query_json(query_set: tuple[str, str]):
     "Executes a query to the Power BI API and returns the result as a json."
     
     dataset_id, query = query_set
     headers = {
-        'Authorization': f'Bearer {access_token}',
+        'Authorization': f'Bearer {token_api_powerbi}',
         'Content-Type': 'application/json'
     }
     url = f'https://api.powerbi.com/v1.0/myorg/datasets/{dataset_id}/executeQueries'
@@ -78,12 +80,12 @@ def execute_query_json(access_token: str, query_set: tuple[str, str]):
         return {'error': f'Error: {read_dataset.status_code}'}
 
 
-def execute_query_json_2(access_token: str, query_set: tuple[str, str]):
+def execute_query_json_2(query_set: tuple[str, str]):
     "Executes a query to the Power BI API and returns the result as a formatted string."
     
     dataset_id, query = query_set
     headers = {
-        'Authorization': f'Bearer {access_token}',
+        'Authorization': f'Bearer {token_api_powerbi}',
         'Content-Type': 'application/json'
     }
     url = f'https://api.powerbi.com/v1.0/myorg/datasets/{dataset_id}/executeQueries'
@@ -102,12 +104,12 @@ def execute_query_json_2(access_token: str, query_set: tuple[str, str]):
         return f'Error: {read_dataset.status_code}'
 
 
-def execute_query_csv(access_token: str, query_set: tuple[str, str]):
+def execute_query_csv(query_set: tuple[str, str]):
     "Executes a query to the Power BI API and returns the result as a csv."
     
     dataset_id, query = query_set
     headers = {
-        'Authorization': f'Bearer {access_token}',
+        'Authorization': f'Bearer {token_api_powerbi}',
         'Content-Type': 'application/json'
     }
     url = f'https://api.powerbi.com/v1.0/myorg/datasets/{dataset_id}/executeQueries'
