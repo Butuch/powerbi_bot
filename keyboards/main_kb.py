@@ -18,7 +18,7 @@ refresh_reports = KeyboardButton(text=REPORTS_RU['refresh']['name'])
 
 reports_kb_builder = ReplyKeyboardBuilder()
 
-reports_kb_builder.row(btn_report_sales, btn_report_cash, refresh_reports, width=2)
+reports_kb_builder.row(btn_report_cash, btn_report_sales, refresh_reports, width=2)
 
 reports_kb: ReplyKeyboardMarkup = reports_kb_builder.as_markup(
     one_time_keyboard=True,

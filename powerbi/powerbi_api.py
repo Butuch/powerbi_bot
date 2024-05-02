@@ -1,9 +1,9 @@
 import requests
 import pandas as pd
-import csv
 import json
 
-from .powerbi_token import token_api_powerbi
+from powerbi.powerbi_token import token_api_powerbi
+from powerbi.dax_queries import sales_query_set, cash_query_set
 
 
 def _get_powerbi_datasets(access_token):
@@ -40,6 +40,7 @@ def _text_query(dax_query):
     return api_query
 
 
+# Executes a query to the Power BI API and returns the result as a DataFrame
 def execute_query(query_set: tuple[str, str]) -> pd.core.frame.DataFrame:
     "Executes a query to the Power BI API and returns the result as a DataFrame."
     
@@ -60,29 +61,9 @@ def execute_query(query_set: tuple[str, str]) -> pd.core.frame.DataFrame:
         return pd.DataFrame() # f'Error: {read_dataset.status_code}'
 
 
-def execute_query_json(query_set: tuple[str, str]):
-    "Executes a query to the Power BI API and returns the result as a json."
-    
-    dataset_id, query = query_set
-    headers = {
-        'Authorization': f'Bearer {token_api_powerbi}',
-        'Content-Type': 'application/json'
-    }
-    url = f'https://api.powerbi.com/v1.0/myorg/datasets/{dataset_id}/executeQueries'
-    read_dataset = requests.post(url,
-                                 data=_text_query(query),
-                                 headers=headers)
-    if read_dataset.status_code == 200:
-        json_data = read_dataset.json()
-        json_data = json_data['results'][0]['tables'][0]['rows']
-        return json_data
-    else:
-        return {'error': f'Error: {read_dataset.status_code}'}
 
-
-def execute_query_json_2(query_set: tuple[str, str]):
-    "Executes a query to the Power BI API and returns the result as a formatted string."
-    
+def execute_query_to_dict(query_set: tuple[str, str], sort_by: str | None = None) -> dict:
+    "Executes a query to the Power BI API and returns the result as a dict"
     dataset_id, query = query_set
     headers = {
         'Authorization': f'Bearer {token_api_powerbi}',
@@ -95,32 +76,21 @@ def execute_query_json_2(query_set: tuple[str, str]):
     if read_dataset.status_code == 200:
         json_data = read_dataset.json()
         rows = json_data['results'][0]['tables'][0]['rows']
-        columns = list(rows[0].keys())
-        formatted_data = '~'.join(columns) + '\n'
-        formatted_data += '\n'.join(['~'.join(map(str, row.values())) for row in rows])
+        formatted_data = {}
+        for row in rows:
+            metric = row['[keys]']
+            value = int(row['[values]'])
+            formatted_data[metric] = value
+            
+        if sort_by == 'key':
+            formatted_data = dict(sorted(formatted_data.items(), key=lambda item: item[0]))
+        elif sort_by == 'value':
+            formatted_data = dict(sorted(formatted_data.items(), key=lambda item: item[1], reverse=True))
+        elif sort_by is None:
+            pass
+        else:
+            raise ValueError("Invalid value for 'sort_by'. Use 'key', 'value', or None.")
         
         return formatted_data
-    else:
-        return f'Error: {read_dataset.status_code}'
-
-
-def execute_query_csv(query_set: tuple[str, str]):
-    "Executes a query to the Power BI API and returns the result as a csv."
-    
-    dataset_id, query = query_set
-    headers = {
-        'Authorization': f'Bearer {token_api_powerbi}',
-        'Content-Type': 'application/json'
-    }
-    url = f'https://api.powerbi.com/v1.0/myorg/datasets/{dataset_id}/executeQueries'
-    read_dataset = requests.post(url,
-                                 data=_text_query(query),
-                                 headers=headers)
-    if read_dataset.status_code == 200:
-        json_data = read_dataset.json()
-        table_data = json_data['results'][0]['tables'][0]['rows']
-        df = pd.DataFrame(table_data)
-        csv_string = df.to_csv(index=False)
-        return csv_string
     else:
         return f'Error: {read_dataset.status_code}'

@@ -1,36 +1,39 @@
-import pandas as pd
+from powerbi.dax_queries import (
+    sales_query_set,
+    cash_query_set,
+    inc_by_counterparty_query_set,
+    out_by_counterparty_query_set,
+    cash_acc_query_set)
+from powerbi.powerbi_api import execute_query_to_dict
 
-from .dax_queries import sales_query_set, cash_query_set
-from .powerbi_api import execute_query_json_2, execute_query
+report_sales = execute_query_to_dict(sales_query_set,
+                                     sort_by=None)
+report_cash = execute_query_to_dict(cash_query_set)
+report_cash_inc_by_counterparty = execute_query_to_dict(inc_by_counterparty_query_set,
+                                                        sort_by='value')
+report_cash_out_by_counterparty = execute_query_to_dict(out_by_counterparty_query_set,
+                                                        sort_by='value')
+report_cash_acc = execute_query_to_dict(cash_acc_query_set,
+                                        sort_by='key')
 
-pre_report_sales = execute_query(sales_query_set)
-pre_report_cash = execute_query(cash_query_set)
-
-# Transform Sales
-report_sales = pre_report_sales.copy()
-report_sales = report_sales.rename(columns={
-    'Date[Year]': 'Год',
-    '[Sum]': 'Сумма'
-    }
-)
-report_sales['Сумма'] = report_sales['Сумма'].map(lambda x: '{:,.0f}'.format(x).replace(',', ' '))
-report_sales = report_sales.to_string(index=False)
-
-# Transform Cash
-report_cash = pre_report_cash.copy()
-report_cash = report_cash.rename(columns={
-    '2 Проводки[Bank_account]': 'Счет',
-    'Пркл_Валюта[Валюта]': 'currency',
-    '[cash]': 'amount'
-    }
-                           )
-report_cash = report_cash.pivot_table(
-    index='Счет',
-    columns='currency',
-    values='amount',
-    aggfunc='sum'
-).rename_axis(columns=None).reset_index()
-
-report_cash[['KZT', 'EUR', 'USD']] = report_cash[['KZT', 'EUR', 'USD']].apply(lambda x: x.apply(lambda y: '{:,.0f}'.format(y).replace(',', ' ')))
-
-report_cash = report_cash.to_string(index=False)
+report_sales_top_counter = {
+    'АО "ЖасЖибекЭнерго"': '36%',
+    'ТОО "КазахЭкспорт"': '24%',
+    'АО "ИнновейтСолюшнз"': '10%',
+    'ТОО "ЭнергоСтройИнвест"': '7%',
+    'ТОО "ИнтернетТехнологии"': '5%'
+}
+report_sales_top_goods = {
+    'Консолидированная Power bi отчетность': '21%',
+    'Внедрение программного обеспечения': '20%',
+    'Консалтинг': '18%',
+    'Мобильных устройства для бизнеса': '9%',
+    'Бизнес-класс оборудование для касс': '7%'    
+}
+report_sales_top_managers = {
+    'Алия Нургазинова': '24%',
+    'Данияр Куанышев': '19%',
+    'Айгерим Сабитова': '14%',
+    'Асылжан Жумабаев': '10%',
+    'Гульназ Абдрахманова': '9%'    
+}

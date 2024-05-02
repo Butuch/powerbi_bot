@@ -6,13 +6,29 @@ from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
 import asyncio
 
-from powerbi.powerbi_get_data import report_sales, report_cash
+from powerbi.powerbi_get_data import (
+    report_sales,
+    report_cash,
+    report_cash_acc,
+    report_cash_inc_by_counterparty,
+    report_cash_out_by_counterparty,
+    report_sales_top_counter,
+    report_sales_top_goods,
+    report_sales_top_managers
+    )
 from powerbi.powerbi_reports_description import reports_description as rd
-from keyboards.inline_kb import (inline_reports_on_keyboard_sales, inline_reports_off_keyboard_sales,
-                                 inline_reports_on_keyboard_cash, inline_reports_off_keyboard_cash,
-                                 inline_refresh_keyboard_yes_no)
+from keyboards.inline_kb import (
+    inline_reports_on_keyboard_sales,
+    inline_reports_off_keyboard_sales,
+    inline_reports_on_keyboard_cash,
+    inline_reports_off_keyboard_cash,
+    inline_refresh_keyboard_yes_no,
+    inline_reports_cash_details,
+    inline_reports_sales_details
+    )
 from keyboards.main_kb import reports_kb
 from lexicon.lexicon import REPORTS_RU, LEXICON_COMMANDS_RU, OTHER_TEXT
+from services.functions import text_by_rows, text_by_rows_simple
 
 router = Router()
     
@@ -21,7 +37,7 @@ router = Router()
 @router.message(F.text == REPORTS_RU['sales']['name'])
 async def sales_report(message: Message):
     report_name = REPORTS_RU['sales']['name'][1:]
-    description = '\n'.join([f'{key}: {value}' for key, value in rd['sales'].items()])
+    description = text_by_rows_simple(rd['sales'])
     
     if rd['sales']['<b>Рассылка</b>'] == OTHER_TEXT['notif_off']:
         var_reply_markup = inline_reports_on_keyboard_sales
@@ -29,15 +45,52 @@ async def sales_report(message: Message):
         var_reply_markup = inline_reports_off_keyboard_sales
         
     await message.answer(
-        text=f'<strong>{report_name}</strong>\n\n{description}',
+        text=f'<b>{report_name}</b>\n\n{description}',
         reply_markup=var_reply_markup
         )
 
-   
+
 @router.callback_query(F.data == REPORTS_RU['sales']['callbacks']['get_report'])
 async def get_sales_report(callback: CallbackQuery):
+    # splitting the dictionary line by line
+    report_name = f"{REPORTS_RU['sales']['name']} на <b>{rd['sales']['<b>Обновлено</b>']}</b>"
+    report = text_by_rows(report_sales)
     await callback.answer(text='')
-    await callback.message.answer(text=report_sales)
+    await callback.message.answer(
+        text=f'{report_name}\n\n{report}',
+        reply_markup=inline_reports_sales_details
+        )
+    
+# get report sales top 10 counter
+@router.callback_query(F.data == REPORTS_RU['sales_top_counter']['callback'])
+async def get_sales_top_counter_report(callback: CallbackQuery):
+    report_name = REPORTS_RU['sales_top_counter']['name']
+    report = text_by_rows(report_sales_top_counter)
+    await callback.answer(text='')
+    await callback.message.answer(
+        text=f'<b>{report_name}</b>\n\n{report}',
+        reply_markup=inline_reports_sales_details
+        )
+# get report sales top 10 goods
+@router.callback_query(F.data == REPORTS_RU['sales_top_goods']['callback'])
+async def get_sales_top_goods_report(callback: CallbackQuery):
+    report_name = REPORTS_RU['sales_top_goods']['name']
+    report = text_by_rows(report_sales_top_goods)
+    await callback.answer(text='')
+    await callback.message.answer(
+        text=f'<b>{report_name}</b>\n\n{report}',
+        reply_markup=inline_reports_sales_details
+        )
+# get report sales top 10 managers
+@router.callback_query(F.data == REPORTS_RU['sales_top_managers']['callback'])
+async def get_sales_top_managers_report(callback: CallbackQuery):
+    report_name = REPORTS_RU['sales_top_managers']['name']
+    report = text_by_rows(report_sales_top_managers)
+    await callback.answer(text='')
+    await callback.message.answer(
+        text=f'<b>{report_name}</b>\n\n{report}',
+        reply_markup=inline_reports_sales_details
+        )
     
     
 @router.callback_query(F.data == REPORTS_RU['sales']['callbacks']['notif'])
@@ -70,7 +123,7 @@ async def sales_notif_change(callback: CallbackQuery):
 @router.message(F.text == REPORTS_RU['cash']['name'])
 async def cash_report(message: Message):
     report_name = REPORTS_RU['cash']['name'][1:]
-    description = '\n'.join([f'{key}: {value}' for key, value in rd['cash'].items()])
+    description = text_by_rows_simple(rd['cash'])
     
     if rd['cash']['<b>Рассылка</b>'] == OTHER_TEXT['notif_off']:
         var_reply_markup = inline_reports_on_keyboard_cash
@@ -78,16 +131,53 @@ async def cash_report(message: Message):
         var_reply_markup = inline_reports_off_keyboard_cash
         
     await message.answer(
-        text=f'<strong>{report_name}</strong>\n\n{description}',
+        text=f'<b>{report_name}</b>\n\n{description}',
         reply_markup=var_reply_markup
         )
     
     
+# get report cash
 @router.callback_query(F.data == REPORTS_RU['cash']['callbacks']['get_report'])
 async def get_cash_report(callback: CallbackQuery):
+    report_name = REPORTS_RU['cash']['name']
+    report_name_2 = f"и движение денег за <b>{rd['cash']['<b>Обновлено</b>']}</b>"
+    report = text_by_rows(report_cash)
     await callback.answer(text='')
-    await callback.message.answer(text=report_cash)
-    
+    await callback.message.answer(
+        text=f"{report_name}\n{report_name_2}\n\n{report}",
+        reply_markup=inline_reports_cash_details
+        )
+# get report cash by accounts
+@router.callback_query(F.data == REPORTS_RU['cash_acc']['callback'])
+async def get_cash_acc_report(callback: CallbackQuery):
+    report_name = f"{REPORTS_RU['cash_acc']['name']} на <b>{rd['cash']['<b>Обновлено</b>']}</b>"
+    report = text_by_rows(report_cash_acc)
+    await callback.answer(text='')
+    await callback.message.answer(
+        text=f'{report_name}\n\n{report}',
+        reply_markup=inline_reports_cash_details
+        )
+# get report cash inc by counterparty
+@router.callback_query(F.data == REPORTS_RU['cash_inc_counter']['callback'])
+async def get_cash_inc_report(callback: CallbackQuery):
+    report_name = f"{REPORTS_RU['cash_inc_counter']['name']} за <b>{rd['cash']['<b>Обновлено</b>']}</b>"
+    report = text_by_rows(report_cash_inc_by_counterparty)
+    await callback.answer(text='')
+    await callback.message.answer(
+        text=f'{report_name}\n\n{report}',
+        reply_markup=inline_reports_cash_details
+        )
+# get report cash out by counterparty
+@router.callback_query(F.data == REPORTS_RU['cash_out_counter']['callback'])
+async def get_cash_out_report(callback: CallbackQuery):
+    report_name = f"{REPORTS_RU['cash_out_counter']['name']} за <b>{rd['cash']['<b>Обновлено</b>']}</b>"
+    report = text_by_rows(report_cash_out_by_counterparty)
+    await callback.answer(text='')
+    await callback.message.answer(
+        text=f'{report_name}\n\n{report}',
+        reply_markup=inline_reports_cash_details
+        )
+
     
 @router.callback_query(F.data == REPORTS_RU['cash']['callbacks']['notif'])
 async def cash_notif(callback: CallbackQuery):
