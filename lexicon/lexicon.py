@@ -58,7 +58,7 @@ REPORTS_RU = {
             'notif_time_change': 'notif_time_change_cash',
             'get_link': 'link_cash'
             },
-        'link': 'https://app.powerbi.com/view?r=eyJrIjoiNTI2NjEwYjEtNTMwNi00NWRiLThmNTAtNDZkYTM1MGMwODM2IiwidCI6ImJlMmIzZjc2LWIzNDgtNDMxYy04MjBiLWE1NjUzNTg5MDIxYiIsImMiOjl'
+        'link': 'https://app.powerbi.com/view?r=eyJrIjoiNTI2NjEwYjEtNTMwNi00NWRiLThmNTAtNDZkYTM1MGMwODM2IiwidCI6ImJlMmIzZjc2LWIzNDgtNDMxYy04MjBiLWE1NjUzNTg5MDIxYiIsImMiOjl9'
         },
     'cash_acc': {
         'name': '💰 Остаток денег по счетам',
