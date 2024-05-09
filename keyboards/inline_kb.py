@@ -146,8 +146,8 @@ inline_reports_on_keyboard_cash = InlineKeyboardMarkup(
 # inline keyboard with nofication is off
 inline_reports_off_keyboard_cash = InlineKeyboardMarkup(
     inline_keyboard=[[_btn_get_report_cash],
-                     [_btn_notif_off_cash],
                      [_btn_notif_cnahge_cash],
+                     [_btn_notif_off_cash],
                      [_btn_link_powerbi_cash],
                      [_btn_back]]
 )

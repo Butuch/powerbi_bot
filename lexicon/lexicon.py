@@ -54,7 +54,7 @@ REPORTS_RU = {
         'text_link': '🔍 Отчет в Powerbi',
         'callbacks': {
             'get_report': 'get_report_cash',
-            'notif': 'notif_sales',
+            'notif': 'notif_cash',
             'notif_time_change': 'notif_time_change_cash',
             'get_link': 'link_cash'
             },
